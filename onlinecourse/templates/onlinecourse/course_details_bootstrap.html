@@ -1,99 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ course.name }}</title>
+{% extends "onlinecourse/base.html" %}
+{% load static %}
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-</head>
+{% block title %}
+Course Details
+{% endblock %}
 
-<body class="bg-light">
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ course.name }}</h2>
 
-<div class="container py-5">
-    <div class="card shadow-sm">
-        <div class="card-body">
+    {% if course.image %}
+        <img src="{{ course.image.url }}" class="img-fluid mb-3" alt="{{ course.name }}">
+    {% endif %}
 
-            <h1 class="card-title">{{ course.name }}</h1>
+    <p>{{ course.description }}</p>
 
-            <p class="card-text">{{ course.description }}</p>
-
-            <h2 class="mt-4">Course Lessons</h2>
-
+    {% if course.lessons.all %}
+        <h3>Lessons</h3>
+        <div class="list-group">
             {% for lesson in course.lessons.all %}
-                <div class="card mb-3">
-                    <div class="card-body">
+                <div class="list-group-item">
+                    <h5>{{ lesson.title }}</h5>
+                    <p>{{ lesson.content }}</p>
 
-                        <h3 class="h5">{{ lesson.title }}</h3>
-
-                        <p>{{ lesson.content }}</p>
-
-                        <h4 class="h6 mt-3">Exam Questions</h4>
-
-                        <form
-                            method="post"
-                            action="{% url 'submit' lesson.id %}"
-                        >
-                            {% csrf_token %}
-
-                            {% for question in lesson.questions.all %}
-                                <fieldset class="mb-4">
-
-                                    <legend class="h6">
-                                        {{ forloop.counter }}.
-                                        {{ question.question_text }}
-                                    </legend>
-
-                                    {% for choice in question.choices.all %}
-                                        <div class="form-check">
-
-                                            <input
-                                                class="form-check-input"
-                                                type="radio"
-                                                name="question_{{ question.id }}"
-                                                value="{{ choice.id }}"
-                                                id="choice_{{ choice.id }}"
-                                                required
-                                            >
-
-                                            <label
-                                                class="form-check-label"
-                                                for="choice_{{ choice.id }}"
-                                            >
-                                                {{ choice.choice_text }}
-                                            </label>
-
-                                        </div>
-                                    {% endfor %}
-
-                                </fieldset>
-                            {% endfor %}
-
-                            {% if lesson.questions.all %}
-                                <button
-                                    type="submit"
-                                    class="btn btn-primary"
-                                >
-                                    Submit Exam
-                                </button>
-                            {% endif %}
-
-                        </form>
-
-                    </div>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'submit' lesson.id %}" class="btn btn-primary">
+                            Take Exam
+                        </a>
+                    {% endif %}
                 </div>
-
-            {% empty %}
-                <p>No lessons are available for this course yet.</p>
             {% endfor %}
-
         </div>
-    </div>
+    {% endif %}
 </div>
+{% endblock %}
 
-</body>
-</html>
