@@ -1,3 +1,4 @@
+```python
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -65,6 +66,24 @@ class Lesson(models.Model):
         return self.title
 
 
+class Enrollment(models.Model):
+    learner = models.ForeignKey(
+        Learner,
+        on_delete=models.CASCADE,
+        related_name="enrollments"
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="enrollments"
+    )
+    date_enrolled = models.DateField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.learner} - {self.course}"
+
+
 class Question(models.Model):
     course = models.ForeignKey(
         Course,
@@ -77,6 +96,18 @@ class Question(models.Model):
         related_name="questions"
     )
     question_text = models.CharField(max_length=500)
+    grade = models.IntegerField(default=1)
+
+    def is_get_score(self, selected_choice_ids):
+        correct_choice_ids = set(
+            self.choices.filter(is_correct=True).values_list(
+                "id", flat=True
+            )
+        )
+
+        selected_choice_ids = set(selected_choice_ids)
+
+        return correct_choice_ids == selected_choice_ids
 
     def __str__(self):
         return self.question_text
@@ -96,6 +127,16 @@ class Choice(models.Model):
 
 
 class Submission(models.Model):
+    enrollment = models.ForeignKey(
+        Enrollment,
+        on_delete=models.CASCADE,
+        related_name="submissions"
+    )
+    choices = models.ManyToManyField(
+        Choice,
+        related_name="submissions",
+        blank=True
+    )
     learner = models.ForeignKey(
         Learner,
         on_delete=models.CASCADE,
@@ -111,7 +152,5 @@ class Submission(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return (
-            f"{self.learner} - {self.lesson} "
-            f"({self.score}/{self.total_questions})"
-        )
+        return f"Submission {self.id} - {self.enrollment}"
+```
