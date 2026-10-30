@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,73 +15,102 @@
 <body class="bg-light">
 
 <div class="container py-5">
+
     <div class="card shadow-sm">
         <div class="card-body">
 
             <h1 class="text-success">Congratulations!</h1>
-            <h2 class="h4">Exam Results</h2>
+            <h2 class="h4 mb-4">Exam Results</h2>
+
+            <p>
+                Course:
+                <strong>{{ course.name }}</strong>
+            </p>
 
             <p>
                 Lesson:
                 <strong>{{ submission.lesson.title }}</strong>
             </p>
 
-            <p>
-                Your score:
-                <strong>
-                    {{ submission.score }} /
-                    {{ submission.total_questions }}
-                </strong>
-            </p>
+            <div class="alert alert-success">
 
-            {% if submission.total_questions > 0 %}
-                <p>
-                    Percentage:
-                    <strong>
-                        {% widthratio submission.score submission.total_questions 100 %}%
-                    </strong>
+                <h4>Your Score</h4>
+
+                <h2>
+                    {{ score }} / {{ total_grade }}
+                </h2>
+
+                <p class="mb-0">
+                    Percentage: {{ percentage|floatformat:2 }}%
                 </p>
-            {% endif %}
+
+            </div>
 
             <hr>
 
-            <h3 class="h5">Exam Questions</h3>
+            <h3 class="h5 mb-3">Exam Questions and Answers</h3>
 
             {% for question in questions %}
-                <div class="mb-3">
-                    <p>
-                        {{ forloop.counter }}.
-                        {{ question.question_text }}
-                    </p>
 
-                    <ul>
-                        {% for choice in question.choices.all %}
-                            <li>
-                                {{ choice.choice_text }}
+                <div class="card mb-3">
 
-                                {% if choice.is_correct %}
-                                    <span class="text-success">
-                                        (Correct answer)
-                                    </span>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <div class="card-body">
+
+                        <h5>
+                            {{ forloop.counter }}.
+                            {{ question.question_text }}
+                        </h5>
+
+                        <ul class="list-group">
+
+                            {% for choice in question.choices.all %}
+
+                                <li class="list-group-item">
+
+                                    {{ choice.choice_text }}
+
+                                    {% if choice in selected_choices %}
+                                        <span class="badge bg-primary">
+                                            Your Answer
+                                        </span>
+                                    {% endif %}
+
+                                    {% if choice.is_correct %}
+                                        <span class="badge bg-success">
+                                            Correct Answer
+                                        </span>
+                                    {% endif %}
+
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
                 </div>
+
             {% empty %}
-                <p>No questions were found for this lesson.</p>
+
+                <div class="alert alert-warning">
+                    No questions were found for this course.
+                </div>
+
             {% endfor %}
 
             <a
-                href="{% url 'course_details' submission.lesson.course.id %}"
-                class="btn btn-primary"
+                href="{% url 'course_details' course.id %}"
+                class="btn btn-primary mt-3"
             >
                 Back to Course
             </a>
 
         </div>
     </div>
+
 </div>
 
 </body>
 </html>
+```
